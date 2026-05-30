@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Chain Resilience Explorer | Executive Strategy Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-warm: #FDFBF7;
+            --navy-deep: #2D4059;
+            --sand-muted: #ECC19C;
+            --accent-soft: #84A9AC;
+        }
+        body {
+            background-color: var(--bg-warm);
+            color: #333;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(45, 64, 89, 0.1);
+        }
+        .dmaic-step {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .dmaic-step.active {
+            border-left: 4px solid var(--navy-deep);
+            background: rgba(236, 193, 156, 0.2);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- Chosen Palette: Warm Minimalist (Bone, Slate Blue, Muted Sand, Soft Teal) -->
+<!-- Application Structure Plan: 
+    The SPA is structured as a 'Strategic Narrative Journey' rather than a static report. 
+    1. Navigation: Top-level thematic switching.
+    2. Context Section: Visualizing the Pet Food industry growth vs. volatility to establish 'The Why'.
+    3. The Methodology (DMAIC): An interactive stepper allowing users to explore each phase of the ADF redesign.
+    4. Resilience Frameworks: Interactive modules for the Vendor Trust Matrix and the Push-Pull boundary logic.
+    5. AI Governance: A tactical interactive slider to demonstrate human-in-the-loop oversight.
+    This structure is chosen because supply chain executives need to see the link between industry pressure, analytical methodology, and final operational control.
+-->
+<!-- Visualization & Content Choices: 
+    - Industry Growth: Line Chart (Chart.js) showing 71% growth vs. rising volatility index.
+    - Margin Impact: Bar Chart (Chart.js) comparing rigid vs. resilient models across costs (Steel/Logistics).
+    - Methodology: Interactive HTML/CSS Stepper with JS state management to update textual insights.
+    - Vendor Matrix: Interactive Grid (HTML/Tailwind) that updates details based on selection.
+    - Governance: Range Slider (HTML/JS) updating a logic-based authorization console.
+    - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+-->
+
+<nav class="sticky top-0 z-50 border-b border-gray-200 glass-card px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-[#2D4059] rounded-lg flex items-center justify-center text-white font-bold">RE</div>
+            <div>
+                <h1 class="text-lg font-bold text-[#2D4059] leading-tight">SCM Resilience Explorer</h1>
+                <p class="text-xs text-gray-500 uppercase tracking-tighter">Strategic Procurement Strategy v1.0</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap justify-center gap-2">
+            <button onclick="scrollToSection('industry')" class="px-4 py-2 text-sm font-medium hover:bg-[#ECC19C]/20 rounded-full transition">Industry Context</button>
+            <button onclick="scrollToSection('dmaic')" class="px-4 py-2 text-sm font-medium hover:bg-[#ECC19C]/20 rounded-full transition">Methodology</button>
+            <button onclick="scrollToSection('frameworks')" class="px-4 py-2 text-sm font-medium hover:bg-[#ECC19C]/20 rounded-full transition">Strategic Pillars</button>
+            <button onclick="scrollToSection('governance')" class="px-4 py-2 text-sm font-medium bg-[#2D4059] text-white rounded-full transition">AI Governance</button>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-12 space-y-24">
+
+    <!-- Hero / Intro -->
+    <section class="text-center max-w-3xl mx-auto space-y-6">
+        <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#84A9AC]">Executive Briefing</span>
+        <h2 class="text-4xl md:text-5xl font-serif font-light text-[#2D4059]">From Broken Vendors to <span class="italic">Intelligent Resilience</span></h2>
+        <p class="text-lg text-gray-600 leading-relaxed">
+            This explorer translates deep supply chain analysis into an interactive roadmap. We examine how a 71% growth sector navigates a 20% margin shock by shifting from rigid, centralized procurement to a dynamic, multi-hub ecosystem.
+        </p>
+    </section>
+
+    <!-- Section 1: Industry Context -->
+    <section id="industry" class="space-y-12">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <h3 class="text-2xl font-bold text-[#2D4059]">The Growth-Volatility Paradox</h3>
+                <p class="text-gray-600">
+                    The pet food industry is booming, driven by "humanization" trends. However, this growth happens in an era of extreme volatility. Our data shows that while demand is surging, the underlying costs of steel and logistics are eroding margins by up to 16%.
+                </p>
+                <div class="p-6 rounded-xl border border-dashed border-[#ECC19C] bg-[#ECC19C]/5">
+                    <p class="text-sm italic text-gray-500">"We cannot solve 21st-century disruptions with 20th-century rigid procurement models."</p>
+                </div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+                <p class="mt-4 text-xs text-center text-gray-400 font-medium italic">Industry Growth vs. Cost Volatility (10-Year Trend)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: DMAIC Methodology -->
+    <section id="dmaic" class="space-y-12 bg-white/50 p-8 rounded-3xl">
+        <div class="max-w-2xl">
+            <h3 class="text-3xl font-bold text-[#2D4059]">The Analytical Engine: DMAIC</h3>
+            <p class="mt-4 text-gray-600">
+                To move from reactive to proactive, we applied a strict DMAIC framework to the ADF Corporation case study. Click through the stages below to see how data-driven decisions transformed the network.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-12 gap-8">
+            <div class="md:col-span-4 space-y-2">
+                <div id="btn-define" onclick="updateDmaic('define')" class="dmaic-step active p-4 rounded-lg">
+                    <span class="text-xs font-bold text-[#84A9AC]">STAGE 01</span>
+                    <h4 class="font-bold text-[#2D4059]">Define</h4>
+                </div>
+                <div id="btn-measure" onclick="updateDmaic('measure')" class="dmaic-step p-4 rounded-lg">
+                    <span class="text-xs font-bold text-[#84A9AC]">STAGE 02</span>
+                    <h4 class="font-bold text-[#2D4059]">Measure</h4>
+                </div>
+                <div id="btn-analyze" onclick="updateDmaic('analyze')" class="dmaic-step p-4 rounded-lg">
+                    <span class="text-xs font-bold text-[#84A9AC]">STAGE 03</span>
+                    <h4 class="font-bold text-[#2D4059]">Analyze</h4>
+                </div>
+                <div id="btn-improve" onclick="updateDmaic('improve')" class="dmaic-step p-4 rounded-lg">
+                    <span class="text-xs font-bold text-[#84A9AC]">STAGE 04</span>
+                    <h4 class="font-bold text-[#2D4059]">Improve</h4>
+                </div>
+                <div id="btn-control" onclick="updateDmaic('control')" class="dmaic-step p-4 rounded-lg">
+                    <span class="text-xs font-bold text-[#84A9AC]">STAGE 05</span>
+                    <h4 class="font-bold text-[#2D4059]">Control</h4>
+                </div>
+            </div>
+            <div class="md:col-span-8 bg-white p-8 rounded-2xl border border-gray-100 shadow-xl shadow-gray-200/50">
+                <div id="dmaic-content" class="space-y-6">
+                    <h4 id="dmaic-title" class="text-2xl font-bold text-[#2D4059]">Defining the Risk Profile</h4>
+                    <p id="dmaic-desc" class="text-gray-600 leading-relaxed">
+                        We identified that 80% of our supply chain was concentrated in a single market. The goal: Mitigate trade policy volatility while recapturing lost margins.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-[#FDFBF7] rounded-lg">
+                            <span class="text-xs font-bold text-[#84A9AC] uppercase">Key Metric</span>
+                            <p id="dmaic-metric" class="font-bold text-lg">Market Exposure: 80%</p>
+                        </div>
+                        <div class="p-4 bg-[#FDFBF7] rounded-lg">
+                            <span class="text-xs font-bold text-[#84A9AC] uppercase">Action Item</span>
+                            <p id="dmaic-action" class="font-bold text-lg">Network Redesign</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Strategic Frameworks -->
+    <section id="frameworks" class="space-y-16">
+        <div class="text-center max-w-2xl mx-auto space-y-4">
+            <h3 class="text-3xl font-bold text-[#2D4059]">Strategic Pillars of Resilience</h3>
+            <p class="text-gray-600">Implementing the Push-Pull boundary and a Trust-Based vendor matrix to ensure operational stability.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-12">
+            <!-- Push Pull Logic -->
+            <div class="space-y-8 glass-card p-8 rounded-3xl border border-[#ECC19C]/30">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-xl font-bold text-[#2D4059]">Push-Pull Boundary Logic</h4>
+                    <span class="px-3 py-1 bg-[#2D4059] text-white text-[10px] font-bold rounded uppercase">Active Mode</span>
+                </div>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-1 bg-[#ECC19C] rounded-full"></div>
+                        <div>
+                            <p class="font-bold text-sm">Push: Hardlines (Efficiency)</p>
+                            <p class="text-sm text-gray-500">Bulk procurement, AI-driven scale, long-term risk-sharing contracts.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-1 bg-[#84A9AC] rounded-full"></div>
+                        <div>
+                            <p class="font-bold text-sm">Pull: Perishables (Agility)</p>
+                            <p class="text-sm text-gray-500">Real-time demand signals, low waste, JIT fulfillment.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/50 rounded-xl border border-gray-100 italic text-sm text-gray-600">
+                    "The Digital Twin monitors the boundary between these two states to optimize safety stock."
+                </div>
+            </div>
+
+            <!-- Vendor Matrix -->
+            <div class="space-y-6">
+                <h4 class="text-xl font-bold text-[#2D4059]">The 16-Point Trust Matrix</h4>
+                <div class="grid grid-cols-1 gap-3">
+                    <div onclick="selectMatrix('strategic')" id="matrix-strategic" class="p-4 border rounded-xl cursor-pointer bg-[#2D4059] text-white transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">Strategic Partners</span>
+                            <span class="text-xs uppercase opacity-80">High Trust / High Perf</span>
+                        </div>
+                    </div>
+                    <div onclick="selectMatrix('fragile')" id="matrix-fragile" class="p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">Fragile Performers</span>
+                            <span class="text-xs uppercase text-gray-400">Low Trust / High Perf</span>
+                        </div>
+                    </div>
+                    <div onclick="selectMatrix('broken')" id="matrix-broken" class="p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">Broken Vendors</span>
+                            <span class="text-xs uppercase text-gray-400">Low Trust / Low Perf</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="matrix-detail" class="p-6 bg-[#ECC19C]/10 border border-[#ECC19C]/20 rounded-2xl">
+                    <p class="text-sm font-bold text-[#2D4059] uppercase tracking-wide">Strategy Action:</p>
+                    <p id="matrix-strategy" class="text-gray-700 mt-2">Deepen co-investment and shared innovation pipelines. 12% indirect spend saved through these MSAs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: AI Governance Slider -->
+    <section id="governance" class="py-12 px-8 bg-[#2D4059] rounded-[3rem] text-white">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-3xl font-serif font-light">Managing the <span class="italic text-[#ECC19C]">AI Toddler</span></h3>
+                    <p class="mt-4 text-gray-300 leading-relaxed">
+                        Artificial Intelligence is brilliant but requires "parenting." We implement strict Human-in-the-Loop (HITL) thresholds to prevent automated errors in multi-million dollar procurement routes.
+                    </p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs font-bold uppercase text-[#84A9AC]">Risk Threshold ($)</span>
+                        <span id="risk-display" class="text-3xl font-light text-[#ECC19C]">$50,000</span>
+                    </div>
+                    <input type="range" min="5000" max="500000" value="50000" step="5000" 
+                           class="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[#ECC19C]"
+                           id="riskSlider" oninput="updateRisk(this.value)">
+                </div>
+            </div>
+
+            <div class="glass-card p-8 rounded-3xl bg-white/5 text-[#2D4059] border-white/10">
+                <h4 class="text-white font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#ECC19C] animate-pulse"></span>
+                    Live Authorization Protocol
+                </h4>
+                <div class="space-y-6">
+                    <div class="bg-white/10 p-4 rounded-xl">
+                        <p class="text-[10px] text-[#84A9AC] uppercase font-bold">Autonomous AI Actions</p>
+                        <p id="ai-action" class="text-white text-sm mt-1">Automatic SKU replenishment for hardlines.</p>
+                    </div>
+                    <div class="bg-white/10 p-4 rounded-xl border-l-2 border-[#ECC19C]">
+                        <p class="text-[10px] text-[#84A9AC] uppercase font-bold">Required Human Interventions</p>
+                        <p id="human-action" class="text-white text-sm mt-1">Review shipping log for route deviations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="bg-white border-t border-gray-100 py-12 mt-24">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-4">
+        <p class="text-sm font-bold text-[#2D4059] uppercase tracking-widest">Resilience Through Intelligence</p>
+        <p class="text-xs text-gray-400">© 2024 SCM Executive Portfolio | Data Synthesized from the ADF & Pet Food Industry Report</p>
+    </div>
+</footer>
+
+<script>
+    // Navigation scroll helper
+    function scrollToSection(id) {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Chart.js - Industry Trends
+    const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+    new Chart(ctxGrowth, {
+        type: 'line',
+        data: {
+            labels: ['2014', '2016', '2018', '2020', '2022', '2024'],
+            datasets: [
+                {
+                    label: 'Industry Growth (71%)',
+                    data: [100, 115, 135, 150, 165, 171],
+                    borderColor: '#2D4059',
+                    backgroundColor: 'rgba(45, 64, 89, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Cost Volatility Index',
+                    data: [10, 12, 18, 45, 68, 85],
+                    borderColor: '#ECC19C',
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+            },
+            scales: {
+                y: { display: false },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // DMAIC Data Object
+    const dmaicData = {
+        define: {
+            title: "Defining the Risk Profile",
+            desc: "Identified that 80% of supply chain concentration was focused in the US market. Mission: Diversify sourcing to mitigate tariff and trade policy volatility.",
+            metric: "Market Exposure: 80%",
+            action: "Network Redesign"
+        },
+        measure: {
+            title: "Measuring the Margin Gap",
+            desc: "Quantified a 16-20% increase in steel and indirect costs. Established baseline lead times of 4 weeks for critical components.",
+            metric: "Margin Erosion: 18%",
+            action: "Baseline Audit"
+        },
+        analyze: {
+            title: "Root Cause Discovery",
+            desc: "Performed deep-dive analysis linking margin decline to rigid vendor contracts and a lack of real-time visibility in procurement portals.",
+            metric: "Contract Inflexibility",
+            action: "Gap Analysis"
+        },
+        improve: {
+            title: "Optimizing the Network",
+            desc: "Shifted Generic components to Mexico/Europe hubs. Implemented Blue Yonder Luminate for real-time demand-supply synchronization.",
+            metric: "Lead Time: -2 Weeks",
+            action: "Multi-Hub Launch"
+        },
+        control: {
+            title: "Sustaining Resilience",
+            desc: "Established 16-point vendor trust checks and AI governance protocols. Shifted procurement focus to risk-sharing MSAs.",
+            metric: "Spend Saved: 12%",
+            action: "Governance Protocol"
+        }
+    };
+
+    function updateDmaic(step) {
+        // Update styling
+        document.querySelectorAll('.dmaic-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('btn-' + step).classList.add('active');
+        
+        // Update content
+        const data = dmaicData[step];
+        document.getElementById('dmaic-title').innerText = data.title;
+        document.getElementById('dmaic-desc').innerText = data.desc;
+        document.getElementById('dmaic-metric').innerText = data.metric;
+        document.getElementById('dmaic-action').innerText = data.action;
+    }
+
+    // Matrix Logic
+    function selectMatrix(type) {
+        const detail = document.getElementById('matrix-detail');
+        const strategy = document.getElementById('matrix-strategy');
+        
+        // Reset styles
+        ['strategic', 'fragile', 'broken'].forEach(t => {
+            const el = document.getElementById('matrix-' + t);
+            el.className = "p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all";
+            el.querySelector('span:first-child').className = "font-bold";
+            el.querySelector('span:last-child').className = "text-xs uppercase text-gray-400";
+        });
+
+        // Apply active styles
+        const active = document.getElementById('matrix-' + type);
+        active.className = "p-4 border rounded-xl cursor-pointer bg-[#2D4059] text-white transition-all";
+        active.querySelector('span:first-child').className = "font-bold text-white";
+        active.querySelector('span:last-child').className = "text-xs uppercase text-[#84A9AC]";
+
+        if(type === 'strategic') {
+            strategy.innerText = "Deepen co-investment and shared innovation pipelines. 12% indirect spend saved through these MSAs.";
+        } else if(type === 'fragile') {
+            strategy.innerText = "Initiate contingency sourcing immediately. Monitor communication velocity; transition to multi-source model.";
+        } else {
+            strategy.innerText = "Systematic exit strategy. Audit documentation for compliance risks and transition to primary vetted partners.";
+        }
+    }
+
+    // AI Risk Slider Logic
+    function updateRisk(val) {
+        const display = document.getElementById('risk-display');
+        const aiAction = document.getElementById('ai-action');
+        const humanAction = document.getElementById('human-action');
+        const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+        
+        display.innerText = formatted;
+
+        if(val < 50000) {
+            aiAction.innerText = "Autonomous replenishment of low-cost Hardlines.";
+            humanAction.innerText = "Routine audit of cumulative monthly logs.";
+        } else if (val >= 50000 && val < 200000) {
+            aiAction.innerText = "AI draft generation for permit applications (NEXCOL).";
+            humanAction.innerText = "Mandatory sign-off on vendor route deviations.";
+        } else {
+            aiAction.innerText = "AI restricted to 'Watch Mode' and anomaly logging.";
+            humanAction.innerText = "Full Executive review of MSA pricing and physical inspections.";
+        }
+    }
+
+    // Init first state
+    updateRisk(50000);
+
+</script>
+</body>
+</html>
