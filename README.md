@@ -2,7 +2,7 @@
 
 Welcome to my digital procurement portfolio. This interactive workspace demonstrates how a high-growth organization can structurally move from a reactive cost center to an agile, resilient multi-hub network.
 
-🔗 **[CLICK HERE TO VIEW THE LIVE INTERACTIVE DASHBOARD](https://YOUR-USERNAME.github.io/portfolio/scm_resilience_explorer.html)**
+🔗 **[CLICK HERE TO VIEW THE LIVE INTERACTIVE DASHBOARD](https://nhle-ai.github.io/portfolio/)**
 
 ---
 
